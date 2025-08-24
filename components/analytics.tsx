@@ -1,3 +1,4 @@
+// components/analytics.tsx
 // Define the Member interface (should match the one in your dashboard)
 interface Member {
   id?: string;

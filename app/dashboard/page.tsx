@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation'; // Changed from 'next/router'
+import { useRouter } from 'next/navigation';
 import axios, { AxiosError } from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
 import MemberTable from '../../components/MemberTable';
@@ -10,10 +10,10 @@ import Link from 'next/link';
 
 // Define the Member type
 interface Member {
-  id?: string;
+  id: number;
   full_name: string;
   date_of_birth: string;
-  age: string;
+  age: number;
   gender: string;
   nationality: string;
   phone_number: string;
@@ -21,23 +21,23 @@ interface Member {
   church_name: string;
   denomination: string;
   pastor_name: string;
-  emergency_name: string;
-  emergency_relationship: string;
-  emergency_phone: string;
-  emergency_alt_phone: string;
-  allergies: string;
-  chronic_illnesses: string;
-  medications: string;
-  consent_signature: string;
-  consent_date: string;
-  camp_fee: string;
-  deposit_paid: string;
-  balance: string;
-  payment_method: string;
-  receipt_no: string;
-  registration_no: string;
-  date_received: string;
-  checked_by: string;
+  emergency_name: string | null;
+  emergency_relationship: string | null;
+  emergency_phone: string | null;
+  emergency_alt_phone: string | null;
+  allergies: string | null;
+  chronic_illnesses: string | null;
+  medications: string | null;
+  consent_signature: string | null;
+  consent_date: string | null;
+  camp_fee: number | null;
+  deposit_paid: number | null;
+  balance: number | null;
+  payment_method: string | null;
+  receipt_no: string | null;
+  registration_no: string | null;
+  date_received: string | null;
+  checked_by: string | null;
 }
 
 export default function Dashboard() {
@@ -65,6 +65,17 @@ export default function Dashboard() {
     fetchMembers();
   }, [router]);
 
+  const handleLogout = () => {
+    // Remove token from localStorage
+    localStorage.removeItem('token');
+    
+    // Show success message
+    toast.success('Logged out successfully');
+    
+    // Redirect to login page
+    router.push('/');
+  };
+
   const filteredMembers = members.filter((member) =>
     member.full_name.toLowerCase().includes(search.toLowerCase())
   );
@@ -75,11 +86,32 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Church Camp Dashboard</h1>
-          <Link href="/add-member">
-            <button className="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors font-medium">
-              Add Member
+          <div className="flex gap-3 items-center">
+            <Link href="/add-member">
+              <button className="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors font-medium">
+                Add Member
+              </button>
+            </Link>
+            <button 
+              onClick={handleLogout}
+              className="bg-red-600 text-white px-6 py-3 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors font-medium flex items-center gap-2"
+            >
+              <svg 
+                className="w-4 h-4" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" 
+                />
+              </svg>
+              Logout
             </button>
-          </Link>
+          </div>
         </div>
         
         <div className="mb-6">

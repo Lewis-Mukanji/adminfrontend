@@ -1,0 +1,30 @@
+export interface Member {
+  id: number;
+  full_name: string;
+  date_of_birth: string;
+  age: number;
+  gender: string;
+  nationality: string;
+  phone_number: string;
+  email: string;
+  church_name: string;
+  denomination: string;
+  pastor_name: string;
+  emergency_name: string | null;
+  emergency_relationship: string | null;
+  emergency_phone: string | null;
+  emergency_alt_phone: string | null;
+  allergies: string | null;
+  chronic_illnesses: string | null;
+  medications: string | null;
+  consent_signature: string | null;
+  consent_date: string | null;
+  camp_fee: number | null;
+  deposit_paid: number | null;
+  balance: number | null;
+  payment_method: string | null;
+  receipt_no: string | null;
+  registration_no: string | null;
+  date_received: string | null;
+  checked_by: string | null;
+}

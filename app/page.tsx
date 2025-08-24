@@ -11,25 +11,17 @@ import {
   Link,
   InputAdornment,
   IconButton,
-  Avatar,
 } from '@mui/material';
-import {
-  Email,
-  Lock,
-  Visibility,
-  VisibilityOff,
-} from '@mui/icons-material';
+import { Email, Lock, Visibility, VisibilityOff } from '@mui/icons-material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import Image from 'next/image';
+import axios, { AxiosError } from 'axios';
+import toast, { Toaster } from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 const theme = createTheme({
   palette: {
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
+    primary: { main: '#1976d2' },
+    secondary: { main: '#dc004e' },
   },
   typography: {
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
@@ -37,20 +29,29 @@ const theme = createTheme({
 });
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('kedeiyelelewis@gmail.com');
+  const [username, setUsername] = useState('admin'); // Changed from email to username
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simulate login process
-    setTimeout(() => {
+
+    try {
+      const res = await axios.post('http://localhost:5000/api/auth/login', {
+        username,
+        password,
+      });
+      localStorage.setItem('token', res.data.token);
+      toast.success('Login successful!');
+      router.push('/dashboard');
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
+      toast.error(error.response?.data?.error || 'Login failed');
       setIsLoading(false);
-      console.log('Login attempted with:', { email, password });
-    }, 2000);
+    }
   };
 
   const handleTogglePassword = () => {
@@ -60,15 +61,14 @@ export default function LoginPage() {
   return (
     <ThemeProvider theme={theme}>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+        <Toaster />
         <Card className="w-full max-w-md shadow-2xl border-0" sx={{ minHeight: '600px' }}>
           <CardContent className="p-10">
             {/* Logo Section */}
             <Box className="flex flex-col items-center mb-12">
-              {/* Empty logo container - you can add your logo here */}
               <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mb-6 shadow-lg">
-                {/* Leave this empty for your logo */}
                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
-                  {/* Your logo will go here */}
+                  {/* Placeholder for logo */}
                 </div>
               </div>
               <Typography
@@ -82,13 +82,13 @@ export default function LoginPage() {
 
             {/* Login Form */}
             <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Email Field */}
+              {/* Username Field */}
               <TextField
                 fullWidth
-                label="Email Address"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                label="Username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
                 variant="outlined"
                 InputProps={{
@@ -102,17 +102,13 @@ export default function LoginPage() {
                   '& .MuiOutlinedInput-root': {
                     height: '56px',
                     backgroundColor: '#f8fafc',
-                    '&:hover': {
-                      backgroundColor: '#f1f5f9',
-                    },
-                    '&.Mui-focused': {
-                      backgroundColor: '#ffffff',
-                    },
+                    '&:hover': { backgroundColor: '#f1f5f9' },
+                    '&.Mui-focused': { backgroundColor: '#ffffff' },
                   },
                 }}
               />
 
-              {/* Password Field - with more spacing above */}
+              {/* Password Field */}
               <div className="pt-4">
                 <TextField
                   fullWidth
@@ -144,12 +140,8 @@ export default function LoginPage() {
                     '& .MuiOutlinedInput-root': {
                       height: '56px',
                       backgroundColor: '#f8fafc',
-                      '&:hover': {
-                        backgroundColor: '#f1f5f9',
-                      },
-                      '&.Mui-focused': {
-                        backgroundColor: '#ffffff',
-                      },
+                      '&:hover': { backgroundColor: '#f1f5f9' },
+                      '&.Mui-focused': { backgroundColor: '#ffffff' },
                     },
                   }}
                 />
@@ -180,9 +172,7 @@ export default function LoginPage() {
                     backgroundColor: '#1976d2',
                     fontSize: '1.1rem',
                     fontWeight: 600,
-                    '&:hover': {
-                      backgroundColor: '#1565c0',
-                    },
+                    '&:hover': { backgroundColor: '#1565c0' },
                   }}
                 >
                   {isLoading ? 'Signing In...' : 'SIGN IN'}
