@@ -37,6 +37,7 @@ export default function AddMember() {
   });
   
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isPrintingBlank, setIsPrintingBlank] = useState(false);
   const router = useRouter();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -77,7 +78,16 @@ export default function AddMember() {
   };
 
   const handlePrint = () => {
+    setIsPrintingBlank(false);
     window.print();
+  };
+
+  const handlePrintBlank = () => {
+    setIsPrintingBlank(true);
+    setTimeout(() => {
+      window.print();
+      setIsPrintingBlank(false);
+    }, 100);
   };
 
   const handleNewRegistration = () => {
@@ -121,6 +131,14 @@ export default function AddMember() {
   const printLabelClass = "text-sm font-medium text-black";
   const printValueClass = "text-sm text-black border-b border-dotted border-gray-400 min-h-[20px] inline-block min-w-[200px]";
 
+  // Function to get display value - either actual data or blank lines for printing
+  const getDisplayValue = (value: string, minLength: number = 200) => {
+    if (isPrintingBlank) {
+      return ''; // Return empty string for blank form
+    }
+    return value || ''; // Return actual value for filled form
+  };
+
   return (
     <div className="min-h-screen p-6 bg-gray-50">
       <Toaster />
@@ -157,6 +175,38 @@ export default function AddMember() {
         <div className="no-print">
           <h1 className="text-3xl font-bold mb-8 text-gray-900 text-center">Add New Member</h1>
           
+          {/* Print Options - Always visible */}
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <svg className="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm-1 9v-1a1 1 0 011-1h8a1 1 0 011 1v1a1 1 0 01-1 1H5a1 1 0 01-1-1zm5-8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                </svg>
+                <span className="text-blue-900 font-bold text-base">Print Options</span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={handlePrintBlank}
+                  className="px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors"
+                >
+                  📄 Print Blank Form
+                </button>
+                {isSubmitted && (
+                  <button
+                    onClick={handlePrint}
+                    className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                  >
+                    🖨️ Print Filled Form
+                  </button>
+                )}
+              </div>
+            </div>
+            <p className="text-blue-800 text-sm mt-2 font-medium">
+              💡 <strong>Tip:</strong> Use "Print Blank Form" to get an empty form for manual completion, 
+              or fill out the form below and use "Print Filled Form" after submission.
+            </p>
+          </div>
+
           {isSubmitted && (
             <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-md">
               <div className="flex items-center justify-between">
@@ -167,12 +217,6 @@ export default function AddMember() {
                   <span className="text-green-800 font-medium">Member registered successfully!</span>
                 </div>
                 <div className="flex gap-2">
-                  <button
-                    onClick={handlePrint}
-                    className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-                  >
-                    🖨️ Print Registration
-                  </button>
                   <button
                     onClick={handleNewRegistration}
                     className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
@@ -189,8 +233,8 @@ export default function AddMember() {
         <div id="printable-form" className="hidden print:block">
           <div className="text-center mb-6">
             <h1 className="text-2xl font-bold text-black mb-2">CAMP REGISTRATION FORM</h1>
-            <p className="text-sm text-black">Registration No: {formData.registration_no || '_____________'}</p>
-            <p className="text-sm text-black">Date Received: {formData.date_received || '_____________'}</p>
+            <p className="text-sm text-black">Registration No: {getDisplayValue(formData.registration_no) || '_____________'}</p>
+            <p className="text-sm text-black">Date Received: {getDisplayValue(formData.date_received) || '_____________'}</p>
           </div>
 
           <div className="mb-6">
@@ -198,43 +242,43 @@ export default function AddMember() {
             <div className="grid grid-cols-2 gap-x-8 gap-y-4">
               <div>
                 <span className={printLabelClass}>Full Name: </span>
-                <span className={printValueClass}>{formData.full_name}</span>
+                <span className={printValueClass}>{getDisplayValue(formData.full_name)}</span>
               </div>
               <div>
                 <span className={printLabelClass}>Date of Birth: </span>
-                <span className={printValueClass}>{formData.date_of_birth}</span>
+                <span className={printValueClass}>{getDisplayValue(formData.date_of_birth)}</span>
               </div>
               <div>
                 <span className={printLabelClass}>Age: </span>
-                <span className={printValueClass}>{formData.age}</span>
+                <span className={printValueClass}>{getDisplayValue(formData.age)}</span>
               </div>
               <div>
                 <span className={printLabelClass}>Gender: </span>
-                <span className={printValueClass}>{formData.gender}</span>
+                <span className={printValueClass}>{getDisplayValue(formData.gender)}</span>
               </div>
               <div>
                 <span className={printLabelClass}>Nationality: </span>
-                <span className={printValueClass}>{formData.nationality}</span>
+                <span className={printValueClass}>{getDisplayValue(formData.nationality)}</span>
               </div>
               <div>
                 <span className={printLabelClass}>Phone: </span>
-                <span className={printValueClass}>{formData.phone_number}</span>
+                <span className={printValueClass}>{getDisplayValue(formData.phone_number)}</span>
               </div>
               <div className="col-span-2">
                 <span className={printLabelClass}>Email: </span>
-                <span className={printValueClass}>{formData.email}</span>
+                <span className={printValueClass}>{getDisplayValue(formData.email)}</span>
               </div>
               <div>
                 <span className={printLabelClass}>Church: </span>
-                <span className={printValueClass}>{formData.church_name}</span>
+                <span className={printValueClass}>{getDisplayValue(formData.church_name)}</span>
               </div>
               <div>
                 <span className={printLabelClass}>Denomination: </span>
-                <span className={printValueClass}>{formData.denomination}</span>
+                <span className={printValueClass}>{getDisplayValue(formData.denomination)}</span>
               </div>
               <div className="col-span-2">
                 <span className={printLabelClass}>Pastor/Youth Leader: </span>
-                <span className={printValueClass}>{formData.pastor_name}</span>
+                <span className={printValueClass}>{getDisplayValue(formData.pastor_name)}</span>
               </div>
             </div>
           </div>
@@ -244,19 +288,19 @@ export default function AddMember() {
             <div className="grid grid-cols-2 gap-x-8 gap-y-4">
               <div>
                 <span className={printLabelClass}>Name: </span>
-                <span className={printValueClass}>{formData.emergency_name}</span>
+                <span className={printValueClass}>{getDisplayValue(formData.emergency_name)}</span>
               </div>
               <div>
                 <span className={printLabelClass}>Relationship: </span>
-                <span className={printValueClass}>{formData.emergency_relationship}</span>
+                <span className={printValueClass}>{getDisplayValue(formData.emergency_relationship)}</span>
               </div>
               <div>
                 <span className={printLabelClass}>Phone: </span>
-                <span className={printValueClass}>{formData.emergency_phone}</span>
+                <span className={printValueClass}>{getDisplayValue(formData.emergency_phone)}</span>
               </div>
               <div>
                 <span className={printLabelClass}>Alt Phone: </span>
-                <span className={printValueClass}>{formData.emergency_alt_phone}</span>
+                <span className={printValueClass}>{getDisplayValue(formData.emergency_alt_phone)}</span>
               </div>
             </div>
           </div>
@@ -266,15 +310,21 @@ export default function AddMember() {
             <div className="space-y-3">
               <div>
                 <span className={printLabelClass}>Allergies: </span>
-                <span className={`${printValueClass} block mt-1`}>{formData.allergies || 'None specified'}</span>
+                <span className={`${printValueClass} block mt-1`}>
+                  {getDisplayValue(formData.allergies) || (isPrintingBlank ? '' : 'None specified')}
+                </span>
               </div>
               <div>
                 <span className={printLabelClass}>Chronic Illnesses: </span>
-                <span className={`${printValueClass} block mt-1`}>{formData.chronic_illnesses || 'None specified'}</span>
+                <span className={`${printValueClass} block mt-1`}>
+                  {getDisplayValue(formData.chronic_illnesses) || (isPrintingBlank ? '' : 'None specified')}
+                </span>
               </div>
               <div>
                 <span className={printLabelClass}>Current Medications: </span>
-                <span className={`${printValueClass} block mt-1`}>{formData.medications || 'None specified'}</span>
+                <span className={`${printValueClass} block mt-1`}>
+                  {getDisplayValue(formData.medications) || (isPrintingBlank ? '' : 'None specified')}
+                </span>
               </div>
             </div>
           </div>
@@ -284,23 +334,23 @@ export default function AddMember() {
             <div className="grid grid-cols-2 gap-x-8 gap-y-4">
               <div>
                 <span className={printLabelClass}>Camp Fee: KES </span>
-                <span className={printValueClass}>{formData.camp_fee}</span>
+                <span className={printValueClass}>{getDisplayValue(formData.camp_fee)}</span>
               </div>
               <div>
                 <span className={printLabelClass}>Deposit Paid: KES </span>
-                <span className={printValueClass}>{formData.deposit_paid}</span>
+                <span className={printValueClass}>{getDisplayValue(formData.deposit_paid)}</span>
               </div>
               <div>
                 <span className={printLabelClass}>Balance: KES </span>
-                <span className={printValueClass}>{formData.balance}</span>
+                <span className={printValueClass}>{getDisplayValue(formData.balance)}</span>
               </div>
               <div>
                 <span className={printLabelClass}>Payment Method: </span>
-                <span className={printValueClass}>{formData.payment_method}</span>
+                <span className={printValueClass}>{getDisplayValue(formData.payment_method)}</span>
               </div>
               <div className="col-span-2">
                 <span className={printLabelClass}>Receipt No: </span>
-                <span className={printValueClass}>{formData.receipt_no}</span>
+                <span className={printValueClass}>{getDisplayValue(formData.receipt_no)}</span>
               </div>
             </div>
           </div>
@@ -315,11 +365,11 @@ export default function AddMember() {
               <div className="grid grid-cols-2 gap-x-8">
                 <div>
                   <span className={printLabelClass}>Signature: </span>
-                  <span className={printValueClass}>{formData.consent_signature}</span>
+                  <span className={printValueClass}>{getDisplayValue(formData.consent_signature)}</span>
                 </div>
                 <div>
                   <span className={printLabelClass}>Date: </span>
-                  <span className={printValueClass}>{formData.consent_date}</span>
+                  <span className={printValueClass}>{getDisplayValue(formData.consent_date)}</span>
                 </div>
               </div>
             </div>
@@ -330,15 +380,15 @@ export default function AddMember() {
             <div className="grid grid-cols-3 gap-x-6 gap-y-4">
               <div>
                 <span className={printLabelClass}>Reg No: </span>
-                <span className={printValueClass}>{formData.registration_no}</span>
+                <span className={printValueClass}>{getDisplayValue(formData.registration_no)}</span>
               </div>
               <div>
                 <span className={printLabelClass}>Date Received: </span>
-                <span className={printValueClass}>{formData.date_received}</span>
+                <span className={printValueClass}>{getDisplayValue(formData.date_received)}</span>
               </div>
               <div>
                 <span className={printLabelClass}>Checked By: </span>
-                <span className={printValueClass}>{formData.checked_by}</span>
+                <span className={printValueClass}>{getDisplayValue(formData.checked_by)}</span>
               </div>
             </div>
           </div>

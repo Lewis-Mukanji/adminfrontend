@@ -43,6 +43,7 @@ interface Member {
 export default function Dashboard() {
   const [members, setMembers] = useState<Member[]>([]);
   const [search, setSearch] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState<number | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -64,6 +65,40 @@ export default function Dashboard() {
     };
     fetchMembers();
   }, [router]);
+
+  const handleDelete = async (memberId: number, memberName: string) => {
+    // Show confirmation dialog
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${memberName}? This action cannot be undone.`
+    );
+    
+    if (!confirmed) return;
+
+    setDeleteLoading(memberId);
+    
+    try {
+      await axios.delete(`http://localhost:5000/api/members/${memberId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+      
+      // Remove member from state
+      setMembers(prevMembers => prevMembers.filter(member => member.id !== memberId));
+      toast.success(`${memberName} has been deleted successfully`);
+      
+    } catch (err) {
+      const error = err as AxiosError;
+      if (error.response?.status === 401) {
+        toast.error('Session Expired');
+        router.push('/');
+      } else if (error.response?.status === 404) {
+        toast.error('Member not found');
+      } else {
+        toast.error('Failed to delete member. Please try again.');
+      }
+    } finally {
+      setDeleteLoading(null);
+    }
+  };
 
   const handleLogout = () => {
     // Remove token from localStorage
@@ -134,7 +169,11 @@ export default function Dashboard() {
         </div>
         
         <div className="bg-white rounded-lg shadow border border-gray-200">
-          <MemberTable members={filteredMembers} />
+          <MemberTable 
+            members={filteredMembers} 
+            onDelete={handleDelete}
+            deleteLoading={deleteLoading}
+          />
         </div>
       </div>
     </div>
